@@ -8,7 +8,7 @@ Status: `todo`, `doing`, `done`, `blocked`.
 - [x] Criar monorepo, convenções e configuração compartilhada.
 - [x] Modelar schema Prisma inicial.
 - [x] Criar Docker Compose, exemplo de ambiente e CI.
-- [x] Criar repositório GitHub público; publicar branch Codex para revisão — remoto criado; push ainda pendente.
+- [x] Criar repositório GitHub público e publicar `codex/phase-0` para revisão.
 - [ ] Validar lint, testes e build após os pacotes OpenCode estarem implementados — **blocked**: `apps/web` e `apps/api` ainda não têm código/configuração de aplicação.
 
 ## Próximas fases
