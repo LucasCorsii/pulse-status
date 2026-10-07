@@ -22,6 +22,12 @@ Plataforma full stack para monitorar disponibilidade de sites e serviços, regis
 4. Mudanças de estado publicam eventos no WebSocket e disparam canais de alerta ativos.
 5. A web consulta a API para dashboards e páginas públicas de status.
 
+## Regras iniciais de incidentes e eventos
+
+- Abrir incidente após duas falhas consecutivas do mesmo monitor; resolver após uma checagem bem-sucedida.
+- O gateway WebSocket roda no mesmo processo da API NestJS, no namespace `/events`.
+- Canais do MVP: e-mail, webhook genérico e Slack. Tokens/URLs secretos não devem ser expostos em respostas ou logs.
+
 ## Modelo de dados inicial
 
 - `User`: identidade, e-mail único e senha armazenada como hash.
