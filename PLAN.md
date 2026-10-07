@@ -47,7 +47,7 @@ Prefixo `/api/v1`:
 - `GET|POST /monitors`, `GET|PATCH|DELETE /monitors/:id`
 - `GET /monitors/:id/checks`, `GET /monitors/:id/incidents`
 - `GET|POST /alert-channels`, `PATCH|DELETE /alert-channels/:id`
-- `GET /status/:slug` (público)
+- `GET /status/:slug` (público; no MVP, `:slug` recebe o ID do monitor e não há coluna slug no schema)
 - WebSocket `/events` para mudanças de estado autorizadas
 
 IDs de recursos privados devem ser sempre escopados ao usuário autenticado. A API deve validar payloads e aplicar limites de taxa aos endpoints de autenticação.
