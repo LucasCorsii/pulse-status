@@ -141,7 +141,10 @@ export class ChecksService implements OnModuleInit, OnModuleDestroy {
       const incident = await this.prisma.incident.create({
         data: { monitorId, cause: result.errorMessage ?? `Status ${result.statusCode}` },
       });
-      this.events.broadcastIncident({ monitorId, incidentId: incident.id, state: 'opened' });
+      this.events.broadcastIncident(
+        { monitorId, incidentId: incident.id, state: 'opened' },
+        { ownerId: monitor.userId, isPublic: monitor.isPublic },
+      );
       await this.alerts.notifyOwner(monitor.userId, 'down', {
         id: monitor.id,
         name: monitor.name,
@@ -152,7 +155,10 @@ export class ChecksService implements OnModuleInit, OnModuleDestroy {
         where: { id: openIncident.id },
         data: { status: 'RESOLVED', resolvedAt: new Date() },
       });
-      this.events.broadcastIncident({ monitorId, incidentId: openIncident.id, state: 'resolved' });
+      this.events.broadcastIncident(
+        { monitorId, incidentId: openIncident.id, state: 'resolved' },
+        { ownerId: monitor.userId, isPublic: monitor.isPublic },
+      );
       await this.alerts.notifyOwner(monitor.userId, 'up', {
         id: monitor.id,
         name: monitor.name,
@@ -160,12 +166,15 @@ export class ChecksService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    this.events.broadcastStatus({
-      monitorId,
-      status: newStatus,
-      result: checkResult,
-      latencyMs: result.latencyMs,
-      checkedAt: new Date().toISOString(),
-    });
+    this.events.broadcastStatus(
+      {
+        monitorId,
+        status: newStatus,
+        result: checkResult,
+        latencyMs: result.latencyMs,
+        checkedAt: new Date().toISOString(),
+      },
+      { ownerId: monitor.userId, isPublic: monitor.isPublic },
+    );
   }
 }

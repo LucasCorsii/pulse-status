@@ -1,11 +1,16 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { getJwtSecrets } from './auth/jwt-config';
 
 async function bootstrap() {
+  // Falha rápido em produção sem segredos (revisão PR #1 P1-3).
+  getJwtSecrets();
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
+  app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );

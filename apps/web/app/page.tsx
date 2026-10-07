@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { io } from 'socket.io-client';
-import { api, clearTokens, type Monitor } from '../lib/api';
+import { api, getSocketToken, logout, type Monitor } from '../lib/api';
 import { StatusBadge } from '../components/StatusBadge';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -25,7 +25,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     void load();
-    const socket = io(`${API_BASE}/events`, { transports: ['websocket'] });
+    const socket = io(`${API_BASE}/events`, {
+      transports: ['websocket'],
+      auth: { token: getSocketToken() ?? undefined },
+    });
     socket.on('monitor.status', () => void load());
     socket.on('incident.update', () => void load());
     return () => {
@@ -55,8 +58,9 @@ export default function DashboardPage() {
           <button
             className="underline"
             onClick={() => {
-              clearTokens();
-              window.location.href = '/login';
+              void logout().finally(() => {
+                window.location.href = '/login';
+              });
             }}
           >
             Sair
