@@ -39,4 +39,11 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 - **Web:** a página de detalhe do monitor usava `status="UP"` fixo; agora busca o monitor real e exibe nome/URL/status corretos.
 - **API:** `UpdateMonitorDto` aceita `status` (permite pausar/retomar via `PATCH /monitors/:id`), e `main.ts` normaliza a lista de `WEB_ORIGIN`.
 
-**Contrato para a Codex:** o teste de integração deve enviar `x-pulse-client: api` em `POST /auth/register` e `POST /auth/login` para continuar recebendo `accessToken`/`refreshToken` no corpo, **ou** autenticar por cookie. O suporte a `Authorization: Bearer` permanece inalterado. Como `codex/integration-tests` é baseada no head anterior, será necessário rebase sobre este commit.
+**Contrato para a Codex:** enviar `x-pulse-client: api` sem `Origin` em `POST /auth/register` e `POST /auth/login` para receber tokens no corpo. O refresh por cookie permanece somente em cookie. `Authorization: Bearer` continua aceito.
+
+## 2026-10-19 — Codex, testes de integração e componentes
+
+- Adicionados testes de integração de auth, autorização/isolamento por usuário, endpoint público de status e redação de segredos, além de testes de renderização para `StatusBadge` e `LatencyChart`. CI prepara um PostgreSQL efêmero e executa `prisma db push` antes desses testes.
+- O teste de integração envia `x-pulse-client: api` sem header `Origin` nas rotas de registro e login; os testes privados continuam usando `Authorization: Bearer`.
+- O `npm install` acrescentou `hasInstallScript` ao lockfile para registrar o `postinstall` Prisma já definido pelo OpenCode.
+- A branch foi rebaseada primeiro sobre `a9445f7`; integração e componentes passaram. Novo rebase sobre `196be07` em andamento para incluir o endurecimento do contrato de tokens e os schedulers BullMQ.
