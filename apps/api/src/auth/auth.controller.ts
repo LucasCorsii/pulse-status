@@ -11,12 +11,17 @@ import { LoginDto, RefreshDto, RegisterDto } from './dto';
 const API_CLIENT_HEADER = 'x-pulse-client';
 
 function isApiClient(req: Request): boolean {
+  // Navegadores (e qualquer fetch de página) enviam Origin. Tokens no corpo só
+  // vão para clientes programáticos, nunca para um contexto de navegador.
+  if (req.headers.origin) return false;
   const value = req.headers[API_CLIENT_HEADER];
   return String(value ?? '').toLowerCase() === 'api';
 }
 
-function bodyFor(result: AuthResult, req: Request) {
-  if (!isApiClient(req)) return { user: result.user };
+function bodyFor(result: AuthResult, req: Request, tokenFromCookie = false) {
+  // Refresh autenticado por cookie nunca devolve tokens: fecha a exfiltração
+  // por XSS mesmo que o script force o header de opt-in.
+  if (tokenFromCookie || !isApiClient(req)) return { user: result.user };
   return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
 }
 
@@ -56,10 +61,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const cookieToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
+    const fromCookie = !dto.refreshToken && Boolean(cookieToken);
     const token = dto.refreshToken || cookieToken || '';
     const result = await this.auth.refresh(token);
     setAuthCookies(res, result.accessToken, result.refreshToken);
-    return bodyFor(result, req);
+    return bodyFor(result, req, fromCookie);
   }
 
   @Post('logout')
