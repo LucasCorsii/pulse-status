@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
+import { CsrfOriginGuard } from './common/csrf.guard';
 import { UsersModule } from './users/users.module';
 import { MonitorsModule } from './monitors/monitors.module';
 import { AlertChannelsModule } from './alert-channels/alert-channels.module';
@@ -26,6 +27,9 @@ import { PrismaModule } from './prisma.module';
     EventsModule,
     AlertsModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfOriginGuard },
+  ],
 })
 export class AppModule {}

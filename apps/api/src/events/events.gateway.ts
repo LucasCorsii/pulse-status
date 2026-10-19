@@ -8,6 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import { getJwtSecrets } from '../auth/jwt-config';
+import { ACCESS_COOKIE } from '../auth/cookies';
 import { publicRoom, roomsForMonitorEvent, userRoom } from './rooms';
 
 export interface MonitorStatusEvent {
@@ -18,9 +19,38 @@ export interface MonitorStatusEvent {
   checkedAt: string;
 }
 
+function allowedOrigins(): string[] {
+  return (process.env.WEB_ORIGIN ?? 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function corsOrigin(
+  origin: string | undefined,
+  callback: (err: Error | null, allow?: boolean) => void,
+) {
+  // Sem `Origin` (clientes não-browser) é permitido; navegadores ficam na allowlist.
+  if (!origin || allowedOrigins().includes(origin)) return callback(null, true);
+  return callback(new Error('Origin not allowed'));
+}
+
+function parseCookies(header: string | undefined): Record<string, string> {
+  if (!header) return {};
+  const result: Record<string, string> = {};
+  for (const part of header.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq === -1) continue;
+    const key = part.slice(0, eq).trim();
+    if (key) result[key] = decodeURIComponent(part.slice(eq + 1).trim());
+  }
+  return result;
+}
+
 // PLAN.md: gateway WebSocket no mesmo processo NestJS, namespace /events.
 // Anônimos entram apenas na sala `public`; autenticados entram também em `user:{id}`.
-@WebSocketGateway({ namespace: '/events', cors: { origin: true, credentials: true } })
+// A autenticação usa o cookie HttpOnly (navegador) ou `auth.token` (clientes de API).
+@WebSocketGateway({ namespace: '/events', cors: { origin: corsOrigin, credentials: true } })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
@@ -34,6 +64,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const token =
         (client.handshake.auth?.token as string | undefined) ??
         (client.handshake.query?.token as string | undefined) ??
+        parseCookies(client.handshake.headers?.cookie)[ACCESS_COOKIE] ??
         null;
       if (!token) return null;
       const payload = this.jwt?.verify<{ sub: string }>(token, {

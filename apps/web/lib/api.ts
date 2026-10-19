@@ -1,57 +1,54 @@
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? process.env.API_INTERNAL_URL ?? 'http://localhost:4000';
 
-// Compat: a API agora define cookies HttpOnly (ps_access/ps_refresh) no login.
-// O web prefere cookies (credentials:include); o Authorization Bearer é mantido
-// apenas como fallback para clientes não-browser.
-function getFallbackToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('ps.access');
-}
-
-export function saveTokens(accessToken: string, refreshToken: string) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('ps.access', accessToken);
-  localStorage.setItem('ps.refresh', refreshToken);
-}
-
-export function getSocketToken(): string | null {
-  return getFallbackToken();
-}
+// A API autentica por cookies HttpOnly (ps_access/ps_refresh); nenhum token é
+// acessível a JavaScript. O web envia `credentials: include` em todas as chamadas.
 
 export async function logout(): Promise<void> {
-  try {
-    const refresh = typeof window !== 'undefined' ? localStorage.getItem('ps.refresh') : null;
-    await fetch(`${API_BASE}/api/v1/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(refresh ? { refreshToken: refresh } : {}),
-    }).catch(() => undefined);
-  } finally {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('ps.access');
-      localStorage.removeItem('ps.refresh');
-    }
-  }
+  await fetch(`${API_BASE}/api/v1/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  }).catch(() => undefined);
 }
 
-export async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const fallback = getFallbackToken();
-  const res = await fetch(`${API_BASE}/api/v1${path}`, {
+async function request(path: string, init?: RequestInit): Promise<Response> {
+  return fetch(`${API_BASE}/api/v1${path}`, {
     ...init,
     credentials: 'include',
     headers: {
       'content-type': 'application/json',
-      ...(fallback ? { authorization: `Bearer ${fallback}` } : {}),
       ...(init?.headers ?? {}),
     },
   });
+}
+
+// Renova o par de cookies quando o access token expira e repete a chamada uma vez.
+async function refreshSession(): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: '{}',
+  }).catch(() => null);
+  return Boolean(res?.ok);
+}
+
+export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  let res = await request(path, init);
+  if (res.status === 401 && !path.startsWith('/auth/')) {
+    if (await refreshSession()) res = await request(path, init);
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`API ${res.status}: ${text.slice(0, 300)}`);
   }
   return (await res.json()) as T;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string | null;
 }
 
 export interface Monitor {
