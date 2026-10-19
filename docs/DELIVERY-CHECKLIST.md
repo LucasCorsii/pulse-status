@@ -7,7 +7,7 @@
 - [x] Painel, detalhe de monitor e página pública de status.
 - [x] Testes unitários existentes e testes de componentes.
 - [x] Teste de integração para autenticação, isolamento de monitores, status público e redação de segredos.
-- [ ] Corrigir o bootstrap de `ChecksService` no `ChecksModule` e repetir a integração.
+- [x] Corrigir o bootstrap de `ChecksService` no `ChecksModule` e repetir a integração.
 - [ ] Confirmar execução recorrente de verificações com worker BullMQ.
 - [ ] Configurar e validar transporte de e-mail e destinos de alertas.
 
@@ -16,6 +16,8 @@
 - [x] Docker Compose para web, API, PostgreSQL e Redis.
 - [x] `.env.example` sem credenciais reais.
 - [x] CI para formatação, lint, testes, integração e build.
+- [x] Validar localmente formatação, lint, testes unitários, integração e builds após `a9445f7`.
+- [ ] Confirmar resultado do CI do GitHub na branch publicada.
 - [ ] Definir ambiente e provedor de deploy.
 - [ ] Configurar segredos, domínio, TLS e CORS de produção.
 - [ ] Definir backup, retenção e observabilidade.
@@ -23,7 +25,7 @@
 
 ## Revisão
 
-- [ ] Resolver achados pendentes do PR de implementação.
-- [ ] Rodar toda a suíte em CI após integrar os módulos da API.
+- [x] Corrigir os achados P1/P2 registrados na revisão inicial do PR de implementação (`a9445f7`).
+- [ ] Fazer revisão final e confirmar CI do PR de implementação no GitHub.
 - [ ] Revisar documentação de segurança e política de privacidade antes de produção.
 - [ ] Definir licença do repositório.
