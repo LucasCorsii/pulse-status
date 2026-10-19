@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Queue, Worker, JobsOptions } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import { PrismaService } from '../prisma.service';
 import { EventsGateway } from '../events/events.gateway';
@@ -63,16 +63,13 @@ export class ChecksService implements OnModuleInit, OnModuleDestroy {
     this.connection?.disconnect();
   }
 
-  private jobOptions(monitor: { intervalSec: number }): JobsOptions {
-    return {
-      repeat: { every: Math.max(monitor.intervalSec, 15) * 1000 },
-      attempts: 2,
-      backoff: { type: 'exponential', delay: 2000 },
-      removeOnComplete: 100,
-      removeOnFail: 200,
-    };
+  private intervalMs(monitor: { intervalSec: number }): number {
+    return Math.max(monitor.intervalSec, 15) * 1000;
   }
 
+  // Sincroniza os agendamentos: cria/atualiza um scheduler por monitor ativo e
+  // remove os de monitores apagados ou pausados. Isso evita agendamentos
+  // duplicados quando o intervalo muda e jobs órfãos após exclusão/pausa.
   async syncSchedules() {
     if (!this.queue) return;
     try {
@@ -80,17 +77,32 @@ export class ChecksService implements OnModuleInit, OnModuleDestroy {
         where: { status: { not: 'PAUSED' } },
         select: { id: true, intervalSec: true },
       });
-      for (const m of monitors) {
+      const wanted = new Set<string>();
+      for (const monitor of monitors) {
+        const schedulerId = `check:${monitor.id}`;
+        wanted.add(schedulerId);
         await this.queue
-          .add(
-            `check:${m.id}`,
-            { monitorId: m.id },
+          .upsertJobScheduler(
+            schedulerId,
+            { every: this.intervalMs(monitor) },
             {
-              ...this.jobOptions(m),
-              jobId: `check:${m.id}`,
+              name: schedulerId,
+              data: { monitorId: monitor.id },
+              opts: {
+                attempts: 2,
+                backoff: { type: 'exponential', delay: 2000 },
+                removeOnComplete: 100,
+                removeOnFail: 200,
+              },
             },
           )
           .catch(() => undefined);
+      }
+      const existing = await this.queue.getJobSchedulers(0, -1, true).catch(() => []);
+      for (const scheduler of existing) {
+        if (!wanted.has(scheduler.key)) {
+          await this.queue.removeJobScheduler(scheduler.key).catch(() => undefined);
+        }
       }
     } catch (err) {
       this.logger.warn(`syncSchedules failed: ${(err as Error).message}`);

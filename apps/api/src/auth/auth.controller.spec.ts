@@ -61,6 +61,39 @@ describe('AuthController token delivery', () => {
     expect(body).toEqual(RESULT);
   });
 
+  it('never returns tokens to a browser, even with the opt-in header', async () => {
+    const controller = new AuthController(buildService());
+    const { res } = fakeResponse();
+    const body = await controller.register(
+      { email: USER.email, password: 'password123' },
+      requestWith({ 'x-pulse-client': 'api', origin: 'https://app.example' }),
+      res,
+    );
+    expect(body).toEqual({ user: USER });
+  });
+
+  it('does not return tokens on cookie-based refresh, even for opted-in clients', async () => {
+    const controller = new AuthController(buildService());
+    const { res } = fakeResponse();
+    const body = await controller.refresh(
+      {},
+      requestWith({ 'x-pulse-client': 'api' }, { [REFRESH_COOKIE]: 'cookie-token' }),
+      res,
+    );
+    expect(body).toEqual({ user: USER });
+  });
+
+  it('returns tokens on body-based refresh for opted-in API clients', async () => {
+    const controller = new AuthController(buildService());
+    const { res } = fakeResponse();
+    const body = await controller.refresh(
+      { refreshToken: 'body-token' },
+      requestWith({ 'x-pulse-client': 'api' }),
+      res,
+    );
+    expect(body).toEqual(RESULT);
+  });
+
   it('refreshes from the HttpOnly cookie when no body token is provided', async () => {
     const service = buildService();
     const controller = new AuthController(service);

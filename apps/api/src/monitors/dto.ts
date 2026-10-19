@@ -1,4 +1,5 @@
-import { IsBoolean, IsInt, IsOptional, IsString, IsUrl, Max, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUrl, Max, Min } from 'class-validator';
+import { MonitorStatus } from '@prisma/client';
 
 export class CreateMonitorDto {
   @IsString()
@@ -48,4 +49,9 @@ export class UpdateMonitorDto {
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;
+
+  // Permite pausar/retomar um monitor (o worker ignora status PAUSED).
+  @IsOptional()
+  @IsEnum(MonitorStatus)
+  status?: MonitorStatus;
 }

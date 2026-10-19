@@ -22,7 +22,7 @@
 
 ## 2026-10-19 — OpenCode (correções da revisão do PR #1)
 
-Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2 da revisão da Codex. Validação local: `format:check`, lint, **14 suítes / 45 testes** (41 na API + 1 no web) e build de `apps/api` e `apps/web` passam.
+Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2 da revisão da Codex. Validação local: `format:check`, lint, **15 suítes / 48 testes** (47 na API + 1 no web) e build de `apps/api` e `apps/web` passam.
 
 - **P1 bootstrap:** `ChecksModule` agora importa `EventsModule` e `AlertsModule` (fronteira correta do módulo). Adicionado `apps/api/src/app.module.spec.ts`, que inicializa o `AppModule` completo sem banco/Redis como regressão.
 - **P1 SSRF:** `safeFetch` foi reescrito sobre `node:http`/`node:https` e **fixa o IP já validado na conexão** (via `lookup`), eliminando DNS rebinding; cada redirect é revalidado. `isBlockedIp` cobre toda a faixa IPv4-mapeada IPv6 (`::ffff:0:0/96`, inclusive notação hexadecimal como `::ffff:7f00:1`), NAT64, 6to4, Teredo, loopback/link-local/ULA/multicast/documentação. Testes ampliados.
@@ -30,5 +30,13 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 - **P1 SameSite/deploy:** cookies configuráveis por `COOKIE_SAMESITE`/`COOKIE_DOMAIN`/`COOKIE_SECURE` (default `lax` em dev, `none`+`secure` em produção). Adicionado `CsrfOriginGuard` global (valida `Origin`/`Referer` contra `WEB_ORIGIN` em métodos mutáveis) e allowlist de origem no gateway WebSocket.
 - **P2 revogação de refresh:** `RefreshStore` com camada em memória + camada Redis (`REDIS_URL`, TTL e chaves com hash SHA-256); degrada com segurança se o Redis cair.
 - `.env.example`: documentados `COOKIE_*` e `SMTP_*` (revisar se a Codex preferir outro formato para esses arquivos de raiz).
+
+**Rodada extra de auditoria (mesma data):**
+
+- Revisão do PR: `origin/codex/phase-0` avançou com documentação; merge incorporado e conflito de `COORDINATION.md` resolvido, deixando o PR mesclável.
+- **Endurecimento da entrega de tokens:** o opt-in `x-pulse-client: api` só vale para requisições **sem `Origin`** (navegadores nunca recebem tokens no corpo) e o refresh autenticado por cookie **nunca** devolve tokens — fecha a exfiltração via XSS mesmo forçando o header.
+- **BullMQ:** troca de `queue.add({repeat})` por `upsertJobScheduler` com remoção de schedulers de monitores pausados/apagados; evita agendamentos duplicados ao mudar o intervalo e jobs órfãos. Validado no Redis local.
+- **Web:** a página de detalhe do monitor usava `status="UP"` fixo; agora busca o monitor real e exibe nome/URL/status corretos.
+- **API:** `UpdateMonitorDto` aceita `status` (permite pausar/retomar via `PATCH /monitors/:id`), e `main.ts` normaliza a lista de `WEB_ORIGIN`.
 
 **Contrato para a Codex:** o teste de integração deve enviar `x-pulse-client: api` em `POST /auth/register` e `POST /auth/login` para continuar recebendo `accessToken`/`refreshToken` no corpo, **ou** autenticar por cookie. O suporte a `Authorization: Bearer` permanece inalterado. Como `codex/integration-tests` é baseada no head anterior, será necessário rebase sobre este commit.
