@@ -18,7 +18,6 @@ export async function httpCheck(url: string, timeoutMs: number): Promise<HttpChe
     });
     const latencyMs = Date.now() - started;
     const ok = res.status >= 200 && res.status < 400;
-    await res.body?.cancel().catch(() => undefined);
     return {
       ok,
       statusCode: res.status,

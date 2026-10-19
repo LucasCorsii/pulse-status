@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { io } from 'socket.io-client';
-import { api, getSocketToken, logout, type Monitor } from '../lib/api';
+import { api, logout, type Monitor } from '../lib/api';
 import { StatusBadge } from '../components/StatusBadge';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -27,7 +27,7 @@ export default function DashboardPage() {
     void load();
     const socket = io(`${API_BASE}/events`, {
       transports: ['websocket'],
-      auth: { token: getSocketToken() ?? undefined },
+      withCredentials: true,
     });
     socket.on('monitor.status', () => void load());
     socket.on('incident.update', () => void load());

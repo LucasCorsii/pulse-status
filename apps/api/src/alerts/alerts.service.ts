@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AlertChannelType } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
-import { assertHttpUrl, assertPublicHostname, safeFetch } from '../common/ssrf';
+import { safeFetch } from '../common/ssrf';
 import { isMailConfigured, sendAlertEmail } from './mail';
 
 interface ChannelRow {
@@ -50,9 +50,7 @@ export class AlertsService {
       if (channel.type === 'WEBHOOK' || channel.type === 'SLACK') {
         const url = webhookUrlFrom(config);
         if (!url) return;
-        // Anti-SSRF: valida esquema, DNS e redirects antes do POST.
-        const parsed = assertHttpUrl(url);
-        await assertPublicHostname(parsed.hostname);
+        // Anti-SSRF: valida esquema, DNS (com IP fixado), redirects e timeout.
         await safeFetch(url, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },

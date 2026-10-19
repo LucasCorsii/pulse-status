@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { api, saveTokens } from '../../lib/api';
+import { api, type AuthUser } from '../../lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,11 +14,10 @@ export default function LoginPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const data = await api<{ accessToken: string; refreshToken: string }>('/auth/login', {
+      await api<{ user: AuthUser }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-      saveTokens(data.accessToken, data.refreshToken);
       router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha no login');
