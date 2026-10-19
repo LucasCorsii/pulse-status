@@ -18,4 +18,4 @@ Status: `todo`, `doing`, `done`, `blocked`.
 - [x] Codex: testes de integração da API e testes dos componentes principais (branch `codex/integration-tests`; rebase sobre `196be07` em andamento).
 - [ ] Codex: revisão final do PR #1 e confirmação do CI do GitHub após publicação.
 - [ ] Codex: configurar deploy web/API após definição do ambiente e segredos.
-- [ ] Codex: README final, screenshot, diagrama e checklist de entrega.
+- [x] Codex: README, screenshot de referência, diagrama de arquitetura e checklist de entrega (`README.md`, `docs/`). Screenshot atual é uma imagem de referência do painel; substituir por captura final após revisão visual.
