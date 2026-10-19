@@ -52,3 +52,4 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 
 - Adicionados README de execução e API, diagrama Mermaid e checklist de entrega. A imagem em `docs/assets` é uma referência visual existente e ainda precisa ser substituída por uma captura final revisada.
 - Após o rebase sobre `a9445f7`, `prisma db push` e `npm run test:codex` passaram usando o banco descartável `pulse_status_test`: 2 suítes e 3 testes passaram (integração da API e componentes).
+- Rebase concluído primeiro sobre `a9445f7`; validações locais completas passaram nesse head. Atualizar o resultado de CI e testes após revalidar sobre `196be07`.
