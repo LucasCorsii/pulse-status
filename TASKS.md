@@ -14,8 +14,8 @@ Status: `todo`, `doing`, `done`, `blocked`.
 
 ## Próximas fases
 
-- [ ] OpenCode: implementar API NestJS e aplicação Next.js conforme `PLAN.md` (em andamento após integrar `codex/phase-0`).
+- [ ] OpenCode: implementar API NestJS e aplicação Next.js conforme `PLAN.md` (PR #1 aberto; aguardando correções da revisão).
 - [ ] Codex: testes de integração da API e testes dos componentes principais após implementação OpenCode.
-- [ ] Codex: revisar PRs do OpenCode.
+- [ ] Codex: revisar PRs do OpenCode (primeira revisão do PR #1 feita; aguarda nova revisão após correções).
 - [ ] Codex: configurar deploy web/API após definição do ambiente e segredos.
 - [ ] Codex: README final, screenshot, diagrama e checklist de entrega.
