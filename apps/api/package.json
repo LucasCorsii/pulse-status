@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "prisma:generate": "prisma generate --schema ../../packages/database/prisma/schema.prisma",
+    "db:migrate": "prisma migrate deploy --schema ../../packages/database/prisma/schema.prisma",
     "postinstall": "test -f ../../packages/database/prisma/schema.prisma && npm run prisma:generate || echo prisma-generate-skipped",
     "predev": "npm run prisma:generate",
     "prebuild": "npm run prisma:generate",

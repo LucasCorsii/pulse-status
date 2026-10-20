@@ -29,13 +29,21 @@ docker compose up --build
 
 A web fica em `http://localhost:3000` e a API em `http://localhost:4000/api/v1`. O endpoint de saúde é `GET /api/v1/health`. O Compose inicia PostgreSQL e Redis junto com as aplicações.
 
-Para executar os serviços fora do Docker, configure `DATABASE_URL`, `REDIS_URL`, os dois segredos JWT e `WEB_ORIGIN` no ambiente, aplique o schema e inicie cada workspace:
+Para executar os serviços fora do Docker, configure `DATABASE_URL`, `REDIS_URL`, os dois segredos JWT e `WEB_ORIGIN` no ambiente, aplique as migrações e inicie cada workspace:
 
 ```bash
-npx prisma db push --schema packages/database/prisma/schema.prisma
+npm run db:migrate --workspace @pulse-status/api
 npm run dev --workspace @pulse-status/api
 npm run dev --workspace @pulse-status/web
 ```
+
+`db:migrate` executa as migrações versionadas com `prisma migrate deploy`. Se um banco já foi criado com `prisma db push`, faça backup e confirme que o schema corresponde à migração inicial antes de marcar o baseline:
+
+```bash
+npx prisma migrate resolve --applied 20261019000000_init --schema packages/database/prisma/schema.prisma
+```
+
+Não execute a migração inicial sobre tabelas existentes sem marcar o baseline.
 
 ## Verificações
 
@@ -47,7 +55,7 @@ npm run test:codex
 npm run build
 ```
 
-Os testes de integração usam um banco PostgreSQL descartável. Defina `DATABASE_URL` para esse banco e aplique o schema antes de `npm run test:codex`. O teste de integração inicia a API em uma porta local efêmera e limpa as contas criadas ao terminar.
+Os testes de integração usam um banco PostgreSQL descartável. Defina `DATABASE_URL` para esse banco e aplique as migrações antes de `npm run test:codex`. O teste de integração inicia a API em uma porta local efêmera e limpa as contas criadas ao terminar.
 
 ## API
 
