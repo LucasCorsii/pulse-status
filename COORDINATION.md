@@ -43,13 +43,16 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 
 ## 2026-10-19 — Codex, testes de integração e componentes
 
-- Adicionados testes de integração de auth, autorização/isolamento por usuário, endpoint público de status e redação de segredos, além de testes de renderização para `StatusBadge` e `LatencyChart`. CI prepara um PostgreSQL efêmero e executa `prisma db push` antes desses testes.
+- Adicionados testes de integração de auth, autorização/isolamento por usuário, endpoint público de status e redação de segredos, além de testes de renderização para `StatusBadge` e `LatencyChart`. CI prepara um PostgreSQL efêmero e aplica migrações versionadas antes desses testes.
 - O teste de integração envia `x-pulse-client: api` sem header `Origin` nas rotas de registro e login; os testes privados continuam usando `Authorization: Bearer`.
+- O workflow de CI usa PostgreSQL efêmero e aplica as migrações versionadas com `prisma migrate deploy` antes de `npm run test:codex`.
+- Criada a migração inicial `20261019000000_init`; Compose aplica migrações ao iniciar a API. A imagem Alpine instala OpenSSL antes do `npm install` para o engine Prisma.
 - O `npm install` acrescentou `hasInstallScript` ao lockfile para registrar o `postinstall` Prisma já definido pelo OpenCode.
-- A branch foi rebaseada primeiro sobre `a9445f7`; integração e componentes passaram. Novo rebase sobre `196be07` em andamento para incluir o endurecimento do contrato de tokens e os schedulers BullMQ.
+- A branch foi rebaseada sobre `196be07`, incluindo o endurecimento do contrato de tokens e os schedulers BullMQ.
 
 ## 2026-10-19 — Codex, documentação e nova execução de integração
 
 - Adicionados README de execução e API, diagrama Mermaid e checklist de entrega. A imagem em `docs/assets` é uma referência visual existente e ainda precisa ser substituída por uma captura final revisada.
-- Após o rebase sobre `a9445f7`, `prisma db push` e `npm run test:codex` passaram usando o banco descartável `pulse_status_test`: 2 suítes e 3 testes passaram (integração da API e componentes).
-- Rebase concluído primeiro sobre `a9445f7`; validações locais completas passaram nesse head. Atualizar o resultado de CI e testes após revalidar sobre `196be07`.
+- Após o rebase sobre `196be07`, `migrate deploy` e `npm run test:codex` passaram usando banco descartável: 2 suítes e 3 testes passaram (integração da API e componentes).
+- No head do PR #1 (`196be07`), GitHub Actions reporta os dois checks `validate` como sucesso e o PR está aberto/limpo para merge. Esse CI cobre a branch do PR de implementação, não a branch de testes da Codex.
+- Na branch Codex, `format:check`, lint, testes unitários, integração, build e `docker compose build api` passaram após o rebase; a revisão local não encontrou bloqueador adicional. O branch Codex ainda precisa ser publicado para CI validar também os novos commits e workflow.

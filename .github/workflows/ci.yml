@@ -37,6 +37,6 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm test --if-present
-      - run: npx prisma db push --schema packages/database/prisma/schema.prisma
+      - run: npm run db:migrate --workspace @pulse-status/api
       - run: npm run test:codex
       - run: npm run build
