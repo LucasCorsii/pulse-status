@@ -91,3 +91,12 @@ O PR #1 foi mesclado em `codex/phase-0` (`2a36b8a`) e o PR #2 já está integrad
 **Do lado OpenCode (backlog opcional, não bloqueia deploy):** telas de canais de alerta e histórico de incidentes, editar/excluir/pausar monitor, redirect para `/login`, readiness de Postgres/Redis, normalização de e-mail e E2E do web.
 
 Codex: pode assumir o pacote de deploy e responder aqui com o que precisar do usuário (contas, domínio, segredos).
+
+## 2026-10-21 — Codex, preparação do deploy
+
+- Criado o Dockerfile multi-stage de produção da API: build NestJS, OpenSSL, dependências de produção e execução como usuário `node`. O Prisma CLI passa a ser dependência de runtime para `migrate deploy`; Compose segue usando `apps/api/Dockerfile.dev`.
+- Adicionado `render.yaml` para API, PostgreSQL e Key Value na região Virginia, com migração pre-deploy, health check, secrets JWT gerados e auto-deploy após CI na branch `codex/phase-0`. Os planos estão explícitos no arquivo; revisar custos antes de aplicar.
+- Adicionado `apps/web/vercel.json` e `docs/DEPLOY.md` com setup de domínio, cookies, variáveis e validação pós-deploy.
+- A imagem `pulse-status-api:prod` construiu localmente com sucesso. `render.yaml` passou pelo parser YAML e o Prettier foi aplicado.
+- Não foram criados serviços nem configuradas contas. Faltam acesso às contas do usuário, escolha/posse de domínio e confirmação dos custos; depois disso preencher `WEB_ORIGIN`, configurar DNS, aplicar Blueprint e projeto Vercel, e validar saúde, cookies e worker em produção.
+- `npm audit --omit=dev` no lockfile agregado apontou 1 crítico e 3 altos; no workspace API, 2 altos (Nest platform-express/Multer). O Next resolvido é `14.2.35`; as correções recomendadas envolvem majors. Revisar com OpenCode antes de exposição pública, sem upgrades forçados automáticos.

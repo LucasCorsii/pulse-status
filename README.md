@@ -94,6 +94,8 @@ flowchart LR
 - Configure provedores de e-mail e canais de alerta antes de depender de notificações em produção.
 - Antes do deploy, defina provedor, domínio, variáveis e políticas de backup/retensão. Não use os valores ilustrativos do `.env.example` em produção.
 
+O guia de implantação de referência Render + Vercel está em [`docs/DEPLOY.md`](docs/DEPLOY.md). Os arquivos de infraestrutura estão preparados, mas a criação dos serviços depende das contas, do domínio e da revisão dos planos/custos.
+
 ## Licença
 
 Ainda não definida.
