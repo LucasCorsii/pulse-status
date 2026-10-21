@@ -1,4 +1,4 @@
-import { assertHttpUrl, assertPublicHostname, isBlockedIp } from './ssrf';
+import { assertHttpUrl, assertPublicHostname, isBlockedIp, pinnedLookup } from './ssrf';
 
 describe('ssrf policy', () => {
   it('blocks loopback and private IPv4 literals', () => {
@@ -52,5 +52,24 @@ describe('ssrf policy', () => {
     await expect(assertPublicHostname('169.254.169.254')).rejects.toThrow();
     await expect(assertPublicHostname('::ffff:7f00:1')).rejects.toThrow();
     await expect(assertPublicHostname('[::ffff:127.0.0.1]')).rejects.toThrow();
+  });
+
+  it('pinned lookup supports both single-address and all-addresses modes', async () => {
+    const destination = { address: '93.184.216.34', family: 4 as const };
+    const lookup = pinnedLookup(destination);
+
+    const all = await new Promise<unknown>((resolve, reject) => {
+      lookup('example.com', { all: true }, (err, address) =>
+        err ? reject(err) : resolve(address),
+      );
+    });
+    expect(all).toEqual([{ address: '93.184.216.34', family: 4 }]);
+
+    const single = await new Promise<unknown>((resolve, reject) => {
+      lookup('example.com', {}, (err, address, family) =>
+        err ? reject(err) : resolve({ address, family }),
+      );
+    });
+    expect(single).toEqual({ address: '93.184.216.34', family: 4 });
   });
 });

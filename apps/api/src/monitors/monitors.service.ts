@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ChecksService } from '../checks/checks.service';
 import { PrismaService } from '../prisma.service';
 import { summarizeChecks } from '../uptime/uptime';
 import { CreateMonitorDto, UpdateMonitorDto } from './dto';
 
 @Injectable()
 export class MonitorsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly checksService: ChecksService,
+  ) {}
 
   list(userId: string) {
     return this.prisma.monitor.findMany({
@@ -20,8 +24,8 @@ export class MonitorsService {
     return monitor;
   }
 
-  create(userId: string, dto: CreateMonitorDto) {
-    return this.prisma.monitor.create({
+  async create(userId: string, dto: CreateMonitorDto) {
+    const monitor = await this.prisma.monitor.create({
       data: {
         userId,
         name: dto.name,
@@ -31,16 +35,22 @@ export class MonitorsService {
         isPublic: dto.isPublic ?? false,
       },
     });
+    // Agenda imediatamente em vez de esperar o próximo ciclo de sincronização.
+    void this.checksService.syncSchedules();
+    return monitor;
   }
 
   async update(userId: string, id: string, dto: UpdateMonitorDto) {
     await this.get(userId, id);
-    return this.prisma.monitor.update({ where: { id }, data: dto });
+    const monitor = await this.prisma.monitor.update({ where: { id }, data: dto });
+    void this.checksService.syncSchedules();
+    return monitor;
   }
 
   async remove(userId: string, id: string) {
     await this.get(userId, id);
     await this.prisma.monitor.delete({ where: { id } });
+    void this.checksService.syncSchedules();
     return { ok: true };
   }
 

@@ -39,4 +39,12 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 - **Web:** a página de detalhe do monitor usava `status="UP"` fixo; agora busca o monitor real e exibe nome/URL/status corretos.
 - **API:** `UpdateMonitorDto` aceita `status` (permite pausar/retomar via `PATCH /monitors/:id`), e `main.ts` normaliza a lista de `WEB_ORIGIN`.
 
+## 2026-10-21 — OpenCode, validação do worker em execução
+
+- **Bug crítico corrigido:** o `lookup` fixado do `safeFetch` ignorava `options.all`; no Node 20 (`autoSelectFamily`) toda checagem HTTPS falhava com `ERR_INVALID_IP_ADDRESS`. Agora ele responde com array no modo `all` e com string/family no modo simples, e há teste unitário para os dois. Isso afetava monitores **e** webhooks/Slack.
+- **Agendamento imediato:** `MonitorsService` chama `syncSchedules()` após criar/editar/excluir monitor, em vez de esperar até 60s pelo próximo ciclo.
+- **Testes de alertas:** `alerts.service.spec.ts` cobre payload de webhook/Slack, canal sem destino e falha de canal sem derrubar a checagem.
+- **Validação ponta a ponta (Docker):** monitor em `https://example.com` → 3× SUCCESS (HTTP 200, ~19–56ms); monitor com URL 404 → 3× FAILURE, incidente `OPEN` após 2 falhas; ao corrigir a URL → status `UP` e incidente `RESOLVED` na primeira checagem. Schedulers criados/removidos no Redis conforme pausa/exclusão.
+- Validação: format, lint, **16 suítes / 52 testes** e builds. PR #1 segue `CLEAN`/`MERGEABLE`.
+
 **Contrato para a Codex:** o teste de integração deve enviar `x-pulse-client: api` em `POST /auth/register` e `POST /auth/login` para continuar recebendo `accessToken`/`refreshToken` no corpo, **ou** autenticar por cookie. O suporte a `Authorization: Bearer` permanece inalterado. Como `codex/integration-tests` é baseada no head anterior, será necessário rebase sobre este commit.
