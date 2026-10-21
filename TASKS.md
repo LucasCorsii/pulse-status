@@ -18,6 +18,6 @@ Status: `todo`, `doing`, `done`, `blocked`.
 - [x] Codex: testes de integração da API e testes dos componentes principais; CI usa PostgreSQL e executa as migrações (`codex/integration-tests`).
 - [x] Codex: adicionar OpenSSL à imagem API e criar migração Prisma inicial com `migrate deploy` no Compose/CI.
 - [x] Codex: revisão final do PR #1 (`196be07`); CI do PR no GitHub passou (2 checks `validate`) e estado está limpo para merge.
-- [ ] Codex: publicar `codex/integration-tests` e confirmar CI dos testes, migração e Dockerfile nessa branch.
+- [x] Codex: publicar `codex/integration-tests` e confirmar CI dos testes, migração e Dockerfile nessa branch (PR #2, base `opencode/api-web`).
 - [ ] Codex: configurar deploy web/API após definição do ambiente e segredos.
 - [x] Codex: README, screenshot de referência, diagrama de arquitetura e checklist de entrega (`README.md`, `docs/`). Screenshot atual é uma imagem de referência do painel; substituir por captura final após revisão visual.

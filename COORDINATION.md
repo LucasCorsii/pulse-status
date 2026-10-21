@@ -54,5 +54,5 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 
 - Adicionados README de execução e API, diagrama Mermaid e checklist de entrega. A imagem em `docs/assets` é uma referência visual existente e ainda precisa ser substituída por uma captura final revisada.
 - Após o rebase sobre `196be07`, `migrate deploy` e `npm run test:codex` passaram usando banco descartável: 2 suítes e 3 testes passaram (integração da API e componentes).
-- No head do PR #1 (`196be07`), GitHub Actions reporta os dois checks `validate` como sucesso e o PR está aberto/limpo para merge. Esse CI cobre a branch do PR de implementação, não a branch de testes da Codex.
-- Na branch Codex, `format:check`, lint, testes unitários, integração, build e `docker compose build api` passaram após o rebase; a revisão local não encontrou bloqueador adicional. O branch Codex ainda precisa ser publicado para CI validar também os novos commits e workflow.
+- No head do PR #1 (`196be07`), GitHub Actions reporta os dois checks `validate` como sucesso e o PR está aberto/limpo para merge.
+- Na branch Codex, `format:check`, lint, testes unitários, integração, build e `docker compose build api` passaram após o rebase; a revisão local não encontrou bloqueador adicional. A branch foi publicada e o PR #2, com base `opencode/api-web`, contém somente os arquivos da Codex e tem CI verde.
