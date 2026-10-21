@@ -24,6 +24,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-pulse}:${POSTGRES_PASSWORD:-pulse_dev_only}@postgres:5432/${POSTGRES_DB:-pulse_status}?schema=public
       REDIS_URL: redis://redis:6379
       API_PORT: 4000
+    command: ['sh', '-c', 'npm run db:migrate && npm run dev']
     ports:
       - '${API_PORT:-4000}:4000'
     depends_on:

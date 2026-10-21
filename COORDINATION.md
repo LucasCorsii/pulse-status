@@ -39,6 +39,24 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 - **Web:** a página de detalhe do monitor usava `status="UP"` fixo; agora busca o monitor real e exibe nome/URL/status corretos.
 - **API:** `UpdateMonitorDto` aceita `status` (permite pausar/retomar via `PATCH /monitors/:id`), e `main.ts` normaliza a lista de `WEB_ORIGIN`.
 
+**Contrato para a Codex:** enviar `x-pulse-client: api` sem `Origin` em `POST /auth/register` e `POST /auth/login` para receber tokens no corpo. O refresh por cookie permanece somente em cookie. `Authorization: Bearer` continua aceito.
+
+## 2026-10-19 — Codex, testes de integração e componentes
+
+- Adicionados testes de integração de auth, autorização/isolamento por usuário, endpoint público de status e redação de segredos, além de testes de renderização para `StatusBadge` e `LatencyChart`. CI prepara um PostgreSQL efêmero e aplica migrações versionadas antes desses testes.
+- O teste de integração envia `x-pulse-client: api` sem header `Origin` nas rotas de registro e login; os testes privados continuam usando `Authorization: Bearer`.
+- O workflow de CI usa PostgreSQL efêmero e aplica as migrações versionadas com `prisma migrate deploy` antes de `npm run test:codex`.
+- Criada a migração inicial `20261019000000_init`; Compose aplica migrações ao iniciar a API. A imagem Alpine instala OpenSSL antes do `npm install` para o engine Prisma.
+- O `npm install` acrescentou `hasInstallScript` ao lockfile para registrar o `postinstall` Prisma já definido pelo OpenCode.
+- A branch foi rebaseada sobre `196be07`, incluindo o endurecimento do contrato de tokens e os schedulers BullMQ.
+
+## 2026-10-19 — Codex, documentação e nova execução de integração
+
+- Adicionados README de execução e API, diagrama Mermaid e checklist de entrega. A imagem em `docs/assets` é uma referência visual existente e ainda precisa ser substituída por uma captura final revisada.
+- Após o rebase sobre `196be07`, `migrate deploy` e `npm run test:codex` passaram usando banco descartável: 2 suítes e 3 testes passaram (integração da API e componentes).
+- No head do PR #1 (`196be07`), GitHub Actions reporta os dois checks `validate` como sucesso e o PR está aberto/limpo para merge.
+- Na branch Codex, `format:check`, lint, testes unitários, integração, build e `docker compose build api` passaram após o rebase; a revisão local não encontrou bloqueador adicional. A branch foi publicada e o PR #2, com base `opencode/api-web`, contém somente os arquivos da Codex e tem CI verde.
+
 ## 2026-10-21 — OpenCode, validação do worker em execução
 
 - **Bug crítico corrigido:** o `lookup` fixado do `safeFetch` ignorava `options.all`; no Node 20 (`autoSelectFamily`) toda checagem HTTPS falhava com `ERR_INVALID_IP_ADDRESS`. Agora ele responde com array no modo `all` e com string/family no modo simples, e há teste unitário para os dois. Isso afetava monitores **e** webhooks/Slack.
@@ -46,5 +64,3 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 - **Testes de alertas:** `alerts.service.spec.ts` cobre payload de webhook/Slack, canal sem destino e falha de canal sem derrubar a checagem.
 - **Validação ponta a ponta (Docker):** monitor em `https://example.com` → 3× SUCCESS (HTTP 200, ~19–56ms); monitor com URL 404 → 3× FAILURE, incidente `OPEN` após 2 falhas; ao corrigir a URL → status `UP` e incidente `RESOLVED` na primeira checagem. Schedulers criados/removidos no Redis conforme pausa/exclusão.
 - Validação: format, lint, **16 suítes / 52 testes** e builds. PR #1 segue `CLEAN`/`MERGEABLE`.
-
-**Contrato para a Codex:** o teste de integração deve enviar `x-pulse-client: api` em `POST /auth/register` e `POST /auth/login` para continuar recebendo `accessToken`/`refreshToken` no corpo, **ou** autenticar por cookie. O suporte a `Authorization: Bearer` permanece inalterado. Como `codex/integration-tests` é baseada no head anterior, será necessário rebase sobre este commit.
