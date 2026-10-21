@@ -64,3 +64,30 @@ Atualização da branch `opencode/api-web` (PR #1) endereçando os achados P1/P2
 - **Testes de alertas:** `alerts.service.spec.ts` cobre payload de webhook/Slack, canal sem destino e falha de canal sem derrubar a checagem.
 - **Validação ponta a ponta (Docker):** monitor em `https://example.com` → 3× SUCCESS (HTTP 200, ~19–56ms); monitor com URL 404 → 3× FAILURE, incidente `OPEN` após 2 falhas; ao corrigir a URL → status `UP` e incidente `RESOLVED` na primeira checagem. Schedulers criados/removidos no Redis conforme pausa/exclusão.
 - Validação: format, lint, **16 suítes / 52 testes** e builds. PR #1 segue `CLEAN`/`MERGEABLE`.
+
+## 2026-10-21 — OpenCode → Codex: handoff de deploy
+
+O PR #1 foi mesclado em `codex/phase-0` (`2a36b8a`) e o PR #2 já está integrado. A parte de produto (OpenCode) está concluída e o CI da branch padrão está verde. **Falta o deploy, que é da Codex.** Itens para assumir:
+
+**Bloqueiam o lançamento**
+
+1. **Dockerfile de produção da API:** o atual (`apps/api/Dockerfile`) roda `npm run dev` e mantém devDependencies. Precisa de build (`npm run build`) + start (`node dist/main.js`), usuário non-root e imagem final enxuta.
+2. **Configs de deploy:** `render.yaml`/`fly.toml` (API) e `vercel.json` (web), com healthcheck, comando de migração (`prisma migrate deploy`) e redeploy automático a partir de `codex/phase-0` (ou `main`).
+3. **Segredos de produção:** `DATABASE_URL`, `REDIS_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` (≥32 chars), `WEB_ORIGIN`, `SMTP_*` e `COOKIE_*`.
+4. **Domínio + TLS + CORS:** preferir subdomínios do mesmo site (`app.*` + `api.*`) com `COOKIE_SAMESITE=lax`; se for cross-site, `none` + `secure` e validar bloqueio de cookies de terceiros. Ajustar `WEB_ORIGIN` e a allowlist do WebSocket.
+5. **Banco/Redis gerenciados:** rodar `migrate deploy` no banco novo, validar o endpoint de saúde e o worker BullMQ consumindo jobs.
+6. **Backup/retenção e observabilidade mínima:** logs da API/worker, alerta se API ou worker cair, política de retenção de checagens/incidentes.
+
+**Pendências do checklist que dependem de infra**
+
+- Validar entrega real de e-mail (SMTP) e de webhook/Slack com destino público.
+- Screenshot final com dados de demonstração revisados.
+- Política de privacidade/segurança e licença do repositório.
+
+**Observação:** a checagem recorrente do BullMQ foi validada em 2026-10-21 (3 ciclos em `https://example.com`, incidente abre após 2 falhas e resolve no primeiro sucesso), então esse item do checklist pode ser marcado como concluído.
+
+**Decisões pendentes do usuário:** provedor (Vercel para web; Render/Railway/Fly para API; Postgres/Redis gerenciados), domínio e segredos.
+
+**Do lado OpenCode (backlog opcional, não bloqueia deploy):** telas de canais de alerta e histórico de incidentes, editar/excluir/pausar monitor, redirect para `/login`, readiness de Postgres/Redis, normalização de e-mail e E2E do web.
+
+Codex: pode assumir o pacote de deploy e responder aqui com o que precisar do usuário (contas, domínio, segredos).
