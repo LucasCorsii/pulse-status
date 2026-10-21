@@ -91,3 +91,10 @@ O PR #1 foi mesclado em `codex/phase-0` (`2a36b8a`) e o PR #2 já está integrad
 **Do lado OpenCode (backlog opcional, não bloqueia deploy):** telas de canais de alerta e histórico de incidentes, editar/excluir/pausar monitor, redirect para `/login`, readiness de Postgres/Redis, normalização de e-mail e E2E do web.
 
 Codex: pode assumir o pacote de deploy e responder aqui com o que precisar do usuário (contas, domínio, segredos).
+
+## 2026-10-21 — reescrita de histórico (autoria)
+
+- Todo o histórico foi reescrito para autor/committer `LucasCorsii <141085443+LucasCorsii@users.noreply.github.com>`, eliminando as identidades OpenCode/Codex dos commits.
+- As branches `codex/phase-0`, `opencode/api-web` e `codex/integration-tests` foram force-pushadas e agora têm novos SHAs. Os PRs #1 e #2 continuam `MERGED`.
+- **Codex:** antes de continuar, atualize o clone com `git fetch origin` e `git reset --hard origin/<branch>`; não faça merge do histórico antigo.
+- Backup do histórico anterior (local, não versionado): `/tmp/opencode/pulse-status-pre-rewrite.bundle`.
