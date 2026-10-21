@@ -19,9 +19,12 @@
 - [x] CI para formatação, lint, testes, integração e build.
 - [x] Executar migrações Prisma no CI com PostgreSQL antes da integração.
 - [x] Instalar OpenSSL na imagem Alpine da API para o engine Prisma.
+- [x] Imagem API de produção com build, dependências de produção e usuário non-root.
+- [x] Blueprint Render com API, migrações, PostgreSQL e Redis gerenciados; configuração Vercel para Next.js.
 - [x] Validar localmente formatação, lint, testes unitários, integração, builds e build da imagem API após rebase sobre `196be07`.
 - [x] Publicar branch Codex e confirmar CI verde para formatação, lint, testes, migração, integração e build no PR #2.
-- [ ] Definir ambiente e provedor de deploy.
+- [x] Preparar a configuração de referência Render + Vercel.
+- [ ] Criar serviços e projetos depois de confirmar contas, domínio e custos.
 - [ ] Configurar segredos, domínio, TLS e CORS de produção.
 - [ ] Definir backup, retenção e observabilidade.
 - [ ] Gerar screenshot final em execução com dados de demonstração revisados.
