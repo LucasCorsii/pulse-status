@@ -181,6 +181,29 @@ export async function assertPublicHostname(hostname: string): Promise<void> {
   await resolvePinnedAddress(hostname);
 }
 
+export type PinnedLookup = (
+  hostname: string,
+  options: { all?: boolean },
+  callback: (
+    err: NodeJS.ErrnoException | null,
+    address: string | ResolvedDestination[],
+    family?: number,
+  ) => void,
+) => void;
+
+// Implementa o `lookup` do net/http fixando o IP já validado. O Node 20 chama
+// o lookup com `all: true` (autoSelectFamily/Happy Eyeballs) e espera um array;
+// devolver uma string nesse modo causa ERR_INVALID_IP_ADDRESS.
+export function pinnedLookup(destination: ResolvedDestination): PinnedLookup {
+  return (_hostname, options, callback) => {
+    if (options?.all) {
+      callback(null, [{ address: destination.address, family: destination.family }]);
+      return;
+    }
+    callback(null, destination.address, destination.family);
+  };
+}
+
 export function assertHttpUrl(raw: string): URL {
   let parsed: URL;
   try {
@@ -246,13 +269,7 @@ function requestOnce(
         timeout: timeoutMs,
         // Fixa o IP já validado: impede que o hostname seja re-resolvido
         // (rebinding) entre a validação e a conexão real.
-        lookup: (
-          _host: string,
-          _opts: unknown,
-          callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void,
-        ) => {
-          callback(null, destination.address, destination.family);
-        },
+        lookup: pinnedLookup(destination),
         servername: isHttps && !net.isIP(hostname) ? hostname : undefined,
       },
       (res) => {
