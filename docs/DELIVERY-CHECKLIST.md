@@ -20,7 +20,7 @@
 - [x] Executar migrações Prisma no CI com PostgreSQL antes da integração.
 - [x] Instalar OpenSSL na imagem Alpine da API para o engine Prisma.
 - [x] Validar localmente formatação, lint, testes unitários, integração, builds e build da imagem API após rebase sobre `196be07`.
-- [ ] Publicar branch Codex e confirmar o CI do GitHub nela (o CI verde atual pertence ao PR #1 em `196be07`).
+- [x] Publicar branch Codex e confirmar CI verde para formatação, lint, testes, migração, integração e build no PR #2.
 - [ ] Definir ambiente e provedor de deploy.
 - [ ] Configurar segredos, domínio, TLS e CORS de produção.
 - [ ] Definir backup, retenção e observabilidade.
