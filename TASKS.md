@@ -10,12 +10,14 @@ Status: `todo`, `doing`, `done`, `blocked`.
 - [x] Criar Docker Compose, exemplo de ambiente e CI.
 - [x] Criar repositório GitHub público e publicar `codex/phase-0` para revisão.
 - [x] Definir GitHub como remote compartilhado nos dois clones; manter o caminho local OpenCode como `codex-local`.
-- [ ] Validar lint, testes e build após os pacotes OpenCode estarem implementados — **blocked**: `apps/web` e `apps/api` ainda não têm código/configuração de aplicação.
+- [x] Validar lint, testes unitários e build após a implementação OpenCode (passaram na branch OpenCode).
 
 ## Próximas fases
 
-- [ ] OpenCode: implementar API NestJS e aplicação Next.js conforme `PLAN.md` (PR #1 aberto; aguardando correções da revisão).
-- [ ] Codex: testes de integração da API e testes dos componentes principais após implementação OpenCode.
-- [ ] Codex: revisar PRs do OpenCode (primeira revisão do PR #1 feita; aguarda nova revisão após correções).
+- [x] OpenCode: implementar API NestJS e aplicação Next.js conforme `PLAN.md` (PR #1; correções revisadas em `196be07`).
+- [x] Codex: testes de integração da API e testes dos componentes principais; CI usa PostgreSQL e executa as migrações (`codex/integration-tests`).
+- [x] Codex: adicionar OpenSSL à imagem API e criar migração Prisma inicial com `migrate deploy` no Compose/CI.
+- [x] Codex: revisão final do PR #1 (`196be07`); CI do PR no GitHub passou (2 checks `validate`) e estado está limpo para merge.
+- [x] Codex: publicar `codex/integration-tests` e confirmar CI dos testes, migração e Dockerfile nessa branch (PR #2, base `opencode/api-web`).
 - [ ] Codex: configurar deploy web/API após definição do ambiente e segredos.
-- [ ] Codex: README final, screenshot, diagrama e checklist de entrega.
+- [x] Codex: README, screenshot de referência, diagrama de arquitetura e checklist de entrega (`README.md`, `docs/`). Screenshot atual é uma imagem de referência do painel; substituir por captura final após revisão visual.
