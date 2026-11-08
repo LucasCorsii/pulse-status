@@ -15,7 +15,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
+      dockerfile: apps/api/Dockerfile.dev
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-local-development-secret-do-not-use-in-production}
